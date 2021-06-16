@@ -43,6 +43,12 @@ def callback_handling():
     resp = auth0.get('userinfo')
     userinfo = resp.json()
 
+    access_token = auth0.token.get("access_token")
+    id_token = auth0.token.get("id_token")
+
+    session["access_token"] = access_token
+    session["id_token"] = id_token
+
     # Store the user information in flask session.
     session['jwt_payload'] = userinfo
     session['profile'] = {
@@ -54,7 +60,8 @@ def callback_handling():
 
 @app.route('/login')
 def login():
-    return auth0.authorize_redirect(redirect_uri='http://localhost:3000/callback')
+    return auth0.authorize_redirect(redirect_uri='http://localhost:3000/callback',
+        audience=os.environ.get("AUDIENCE"))
 
 def requires_auth(f):
   @wraps(f)
